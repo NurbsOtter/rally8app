@@ -28,24 +28,42 @@ public class MainActivity extends Activity
 	}
 	public void doLogin(View view)
 	{
-		HttpClient httpClient = new DefaultHttpClient();
-		HttpPost post = new HttpPost("www.rally8.com/login");
 		EditText userName=(EditText)findViewById(R.id.userName);
-		EditText password = (EditText)findViewById(R.id.password);
-		try
-		{
-			List<NameValuePair> data = new ArrayList<NameValuePair>();
-			String userNameText = userName.getText().toString();
-			data.add(new BasicNameValuePair("username",userNameText));
-			data.add(new BasicNameValuePair("password",password.getText().toString()));
-			post.setEntity(new UrlEncodedFormEntity(data));
-			HttpResponse res = httpClient.execute(post);
-			userName.setText(EntityUtils.toString(res.getEntity()));
-			
-		}
-		catch(Exception e)
-		{
-			
-		}
+		EditText password=(EditText)findViewById(R.id.password);
+		LoginHandlerAsync loginTask = new LoginHandlerAsync();
+		loginTask.execute(new String[] {userName.getText().toString(),password.getText().toString()});
 	}
+	private class LoginHandlerAsync extends AsyncTask<String, Void, String>
+	{
+
+		@Override
+		protected String doInBackground(String... p1)
+		{
+			HttpClient httpClient = new DefaultHttpClient();
+			HttpPost post = new HttpPost("http://www.rally8.com/login");
+			
+			try
+			{
+				List<NameValuePair> data = new ArrayList<NameValuePair>();
+				data.add(new BasicNameValuePair("username",p1[0]));
+				data.add(new BasicNameValuePair("password",p1[1]));
+				post.setEntity(new UrlEncodedFormEntity(data));
+				HttpResponse res = httpClient.execute(post);
+				return EntityUtils.toString(res.getEntity());
+			}
+			catch(Exception e)
+			{
+				return "Oh god!";
+			}
+		}
+
+	}
+	@Override
+	protected void onPostExecute(String result)
+	{
+		EditText userName=(EditText)findViewById(R.id.userName);
+		userName.setText(result);
+	}
+	
 }
+
